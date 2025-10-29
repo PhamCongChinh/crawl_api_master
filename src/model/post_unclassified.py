@@ -41,4 +41,4 @@ class PostUnclassifiedModel(BaseModel):
     sentiment: int = Field(default=0)
     server: Optional[str] = None
     isPriority: Optional[bool] = None
-    crawl_bot: str
+    crawl_bot: Optional[str] = None
