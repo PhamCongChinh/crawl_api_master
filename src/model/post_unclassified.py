@@ -28,13 +28,13 @@ class PostUnclassifiedModel(BaseModel):
     views: int = Field(default=0, ge=0)
     web_tags: Optional[str] = Field(default="[]")
     web_keywords: Optional[str] = Field(default="[]")
-    auth_id: str = Field(..., max_length=3000)
-    auth_name: str = Field(..., max_length=3000)
+    auth_id: Optional[str] = Field(default=None, max_length=3000)
+    auth_name: Optional[str] = Field(default=None, max_length=3000)
     auth_type: int
-    auth_url: str = Field(..., max_length=3000)
-    source_id: str = Field(..., max_length=3000)
-    source_name: str = Field(..., max_length=3000)
-    source_url: str = Field(..., max_length=3000)
+    auth_url: Optional[str] = Field(default=None, max_length=3000)
+    source_id: Optional[str] = Field(default=None, max_length=3000)
+    source_name: Optional[str] = Field(default=None, max_length=3000)
+    source_url: Optional[str] = Field(default=None, max_length=3000)
     reply_to: Optional[str] = None
     level: Optional[int] = None
     org_id: Optional[int] = None
