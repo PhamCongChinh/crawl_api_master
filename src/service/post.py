@@ -13,7 +13,7 @@ class PostService():
         for item in items.get("data", []):
             try:
                 post = PostClassifiedModel(**item)  # validate với Pydantic
-                logging.info(f"Dữ liệu hợp lệ: {post.model_dump().get('url')}")
+                # logging.info(f"Dữ liệu hợp lệ: {post.model_dump().get('url')}")
 
                 data = post.model_dump()
                 operations.append(
@@ -40,7 +40,7 @@ class PostService():
         for item in items.get("data", []):
             try:
                 post = PostUnclassifiedModel(**item)  # validate với Pydantic
-                logging.info(f"Dữ liệu hợp lệ: {post.model_dump().get('url')}")
+                # logging.info(f"Dữ liệu hợp lệ: {post.model_dump().get('url')}")
                 data = post.model_dump()
                 operations.append(
                     UpdateOne(
