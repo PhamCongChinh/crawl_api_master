@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from confluent_kafka import Producer
-from service.post import PostService
+from src.service.post import PostService
 from src.core.config import settings
 from src.core.logging import logger
 from src.kafka.service import send_to_kafka
