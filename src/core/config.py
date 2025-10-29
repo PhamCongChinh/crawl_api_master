@@ -7,6 +7,8 @@ class Settings(BaseSettings):
 
     MONGO_URI: str = "mongodb://localhost:27017"
     MONGO_DB: str = "mydb"
+    MONGO_COLLECTION_CLASSIFIED = "data-classified"
+    MONGO_COLLECTION_UNCLASSIFIED = "data-unclassified"
 
     #KAFKA
     KAFKA_BROKER_HOST: str = "localhost"

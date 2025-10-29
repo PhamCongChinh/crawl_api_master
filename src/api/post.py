@@ -1,5 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from confluent_kafka import Producer
+from service.post import PostService
 from src.core.config import settings
 from src.core.logging import logger
 from src.kafka.service import send_to_kafka
@@ -17,8 +18,8 @@ async def insert_posts_classified(request: dict, background_tasks: BackgroundTas
         raise HTTPException(status_code=400, detail="No data provided")
 
     try:
-        # result = await PostService.insert_posts(items=request)
-        # logging.info(f"Inserted classified posts: {result}")
+        result = await PostService.insert_posts(items=request)
+        logger.info(f"Inserted classified posts: {result}")
 
         topic = settings.KAFKA_TOPIC_CLASSIFIED
         data = request.get("data", [])
@@ -43,8 +44,8 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
         raise HTTPException(status_code=400, detail="No data provided")
     
     try:
-        # result = await PostService.insert_unclassified_org_posts(items=request)
-        # logging.info(f"Inserted unclassified org posts: {result}")
+        result = await PostService.insert_unclassified_org_posts(items=request)
+        logger.info(f"Inserted unclassified org posts: {result}")
 
         topic = settings.KAFKA_TOPIC_UNCLASSIFIED
         data = request.get("data", [])
@@ -53,7 +54,7 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
         if items_with_server:
             logger.warning(f"Found {len(items_with_server)} items containing 'server' field:")
             for i, item in enumerate(items_with_server, start=1):
-                logger.warning(f"[{i}] server={item.get('server')} | auth_id={item.get('auth_id')} | url={item.get('url')}")
+                logger.warning(f"[{i}] [{item.get('server')}] | {item.get('url')}")
 
         cleaned_data = []
         for item in data:

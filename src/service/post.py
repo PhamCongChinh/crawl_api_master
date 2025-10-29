@@ -3,7 +3,7 @@ from pymongo import UpdateOne
 
 from src.model.post_classified import PostClassifiedModel
 from src.model.post_unclassified import PostUnclassifiedModel
-from src.core.mongo import db
+from src.core.mongo import collection_classified, collection_unclassified
 import logging
 
 class PostService():
@@ -25,7 +25,7 @@ class PostService():
             except ValidationError as e:
                 logging.info("Dữ liệu không hợp lệ:", post.model_dump().get("url"))
         if operations:
-            result = await db["data_classified"].bulk_write(operations, ordered=False)
+            result = await collection_classified.bulk_write(operations, ordered=False)
             return {
                 "matched": result.matched_count,
                 "modified": result.modified_count,
@@ -50,7 +50,8 @@ class PostService():
             except ValidationError as e:
                 logging.info("Dữ liệu không hợp lệ:", post.model_dump().get("url"))
         if operations:
-            result = await db["data_unclassified"].bulk_write(operations, ordered=False)
+            # result = await db["data_lake_posts_search"].bulk_write(operations, ordered=False)
+            result = await collection_unclassified.bulk_write(operations, ordered=False)
             return {
                 "matched": result.matched_count,
                 "modified": result.modified_count,

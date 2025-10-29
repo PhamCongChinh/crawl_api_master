@@ -40,6 +40,7 @@ class PostClassifiedModel(BaseModel):
     reply_to: Optional[str] = None
     level: Optional[int] = None
     org_id: int
+    server: Optional[str] = None
     sentiment: int = Field(default=0)
     isPriority: bool
     crawl_bot: str
