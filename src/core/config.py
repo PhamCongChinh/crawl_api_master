@@ -10,15 +10,22 @@ class Settings(BaseSettings):
     MONGO_COLLECTION_CLASSIFIED: str = "data-classified"
     MONGO_COLLECTION_UNCLASSIFIED: str = "data-unclassified"
 
-    #KAFKA
-    KAFKA_BROKER_HOST: str = "localhost"
-    KAFKA_BROKER_PORT: int = 9092
+    # TEST
+    KAFKA_BROKER_HOST_TEST: str = "localhost"
+    KAFKA_BROKER_PORT_TEST: int = 9092
 
-    KAFKA_TOPIC_CLASSIFIED: str = "data-classified"
-    KAFKA_TOPIC_UNCLASSIFIED: str = "data-unclassified"
+    KAFKA_TOPIC_CLASSIFIED_TEST: str = "data-classified"
+    KAFKA_TOPIC_UNCLASSIFIED_TEST: str = "data-unclassified"
 
     KAFKA_DEFAULT_PARTITIONS: int = 1
     KAFKA_DEFAULT_REPLICATION: int = 1
+
+    # LIVE
+    KAFKA_BROKER_HOST_LIVE: str = "localhost"
+    KAFKA_BROKER_PORT_LIVE: int = 9092
+
+    KAFKA_TOPIC_CLASSIFIED_LIVE: str = "data-classified"
+    KAFKA_TOPIC_UNCLASSIFIED_LIVE: str = "data-unclassified"
 
     model_config = {
         "env_file": ".env"
