@@ -71,5 +71,5 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
 def delivery_report(err, msg):
     if err is not None:
         logger.error(f"[KAFKA] Failed: {err}")
-    else:
-        logger.info(f"[KAFKA] Offset {msg.offset()} - {msg.key().decode()}")
+    # else:
+    #     logger.info(f"[KAFKA] Offset {msg.offset()} - {msg.key().decode()}")
