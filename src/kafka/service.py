@@ -66,7 +66,7 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
             producer.poll(0.5)
 
     producer.flush(5)
-    logger.info(f"[KAFKA] Sent {len(data)} messages -> {topic}")
+    # logger.info(f"[KAFKA] Sent {len(data)} messages -> {topic}")
 
 def delivery_report(err, msg):
     if err is not None:
