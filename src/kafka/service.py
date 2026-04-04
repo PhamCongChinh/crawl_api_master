@@ -1,3 +1,4 @@
+import hashlib
 import json
 from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka import Producer
@@ -41,10 +42,11 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
 
     for i, item in enumerate(data, start=1):
         try:
-            key = item.get("url", "")
+            key_raw = item.get("url", "")
+            hash_key = hashlib.md5(key_raw.encode()).hexdigest() if key_raw else None
             producer.produce(
                 topic=topic,
-                key=key,
+                key=hash_key,
                 value=json.dumps(item).encode("utf-8"),
                 callback=delivery_report
             )
@@ -53,7 +55,7 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
             producer.poll(1)
             producer.produce(
                 topic=topic,
-                key=key,
+                key=hash_key,
                 value=json.dumps(item).encode("utf-8"),
                 callback=delivery_report
             )
