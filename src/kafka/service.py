@@ -50,6 +50,7 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
                 value=json.dumps(item).encode("utf-8"),
                 callback=delivery_report
             )
+            logger.info(f"[KAFKA] {key_raw}")
         except BufferError:
             # queue đầy → phải poll để giải phóng
             producer.poll(1)
