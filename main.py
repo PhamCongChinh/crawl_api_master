@@ -9,7 +9,7 @@ app.include_router(router_post)
 app.include_router(router_checkhealth)
 
 def main():
-    uvicorn.run("main:app", host=settings.APP_HOST, port=settings.APP_PORT, reload=False)
+    uvicorn.run("main:app", host=settings.APP_HOST, port=settings.APP_PORT, reload=False, access_log=False)
 
 if __name__ == "__main__":
     main()
