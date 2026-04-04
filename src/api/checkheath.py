@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from src.core.config import settings
@@ -50,17 +50,17 @@ async def check_kafka():
 @router.get("/data-volume")
 async def data_volume():
     try:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
-        t_1m = now - datetime.timedelta(minutes=10)
-        t_5m = now - datetime.timedelta(minutes=60)
+        t_1m = now - timedelta(minutes=10)
+        t_5m = now - timedelta(minutes=60)
 
-        records_1m = await db.posts.count_documents({
-            "created_at": {"$gte": t_1m}
+        records_1m = await db.sls_not_spam_posts.count_documents({
+            "createdAt": {"$gte": t_1m}
         })
 
-        records_5m = await db.posts.count_documents({
-            "created_at": {"$gte": t_5m}
+        records_5m = await db.sls_not_spam_posts.count_documents({
+            "createdAt": {"$gte": t_5m}
         })
 
         # logic health
