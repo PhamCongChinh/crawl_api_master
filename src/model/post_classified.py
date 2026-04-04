@@ -10,14 +10,13 @@ class CrawlSourceEnum(IntEnum):
     FACEBOOK = 1
 
 class PostClassifiedModel(BaseModel):
-    # id: Optional[str] = None
     doc_type: int = Field(default=DocTypeEnum.POST)
     source_type: int
     crawl_source: int # crawl_source: int = Field(default=CrawlSourceEnum.FACEBOOK)
     crawl_source_code: Optional[str] = None #crawl_source: int = Field(default=1)
     pub_time: int = Field(..., gt=0)
     crawl_time: int = Field(..., gt=0)
-    subject_id: Optional[str] = Field(default="", max_length=255)
+    subject_id: Optional[str] = Field(default="", max_length=3000)
     title: Optional[str] = None
     description: Optional[str] = None
     content: Optional[str] = Field(default="")
@@ -39,8 +38,8 @@ class PostClassifiedModel(BaseModel):
     source_url: Optional[str] = Field(default=None, max_length=3000)
     reply_to: Optional[str] = None
     level: Optional[int] = None
-    org_id: int
-    server: Optional[str] = None
+    org_id: Optional[int] = None
     sentiment: int = Field(default=0)
-    isPriority: bool
+    isPriority: Optional[bool] = None
     crawl_bot: Optional[str] = None
+    source_ownership: Optional[str] = None
