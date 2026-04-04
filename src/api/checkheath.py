@@ -1,8 +1,11 @@
+import datetime
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from src.core.config import settings
 from src.core.logging import logger
 from confluent_kafka.admin import AdminClient
 from confluent_kafka import Producer
+from src.core.mongo import db
 
 KAFKA_BOOTSTRAP_SERVERS = f"{settings.KAFKA_BROKER_HOST}:{settings.KAFKA_BROKER_PORT}"
 # --- Kafka clients -------------------------------------------------
@@ -17,7 +20,7 @@ async def check_health():
         "status" : "OK"
     }
 
-@router.get("/health/kafka")
+@router.get("/kafka")
 async def check_kafka():
     try:
         # gọi metadata từ Kafka
@@ -41,5 +44,40 @@ async def check_kafka():
     except Exception as e:
         return {
             "status": "DOWN",
+            "error": str(e)
+        }
+    
+@router.get("/data-volume")
+async def data_volume():
+    try:
+        now = datetime.utcnow()
+
+        t_1m = now - datetime.timedelta(minutes=10)
+        t_5m = now - datetime.timedelta(minutes=60)
+
+        records_1m = await db.posts.count_documents({
+            "created_at": {"$gte": t_1m}
+        })
+
+        records_5m = await db.posts.count_documents({
+            "created_at": {"$gte": t_5m}
+        })
+
+        # logic health
+        status = "healthy"
+        if records_1m < 50:
+            status = "low"
+        if records_1m == 0:
+            status = "down"
+
+        return {
+            "records_1m": records_1m,
+            "records_5m": records_5m,
+            "status": status
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
             "error": str(e)
         }
