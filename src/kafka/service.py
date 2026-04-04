@@ -69,4 +69,4 @@ def delivery_report(err, msg):
     if err is not None:
         logger.error(f"[KAFKA] Failed: {err}")
     else:
-        logger.info(f"[KAFKA] Offset {msg.offset()}")
+        logger.info(f"[KAFKA] Offset {msg.offset()} - {msg.key().decode()}")
