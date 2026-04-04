@@ -40,22 +40,33 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
     create_topic_if_not_exists(topic)
 
     for i, item in enumerate(data, start=1):
-        producer.produce(
-            topic=topic,
-            key=item.get("url", ""),
-            value=json.dumps(item).encode("utf-8"),
-            callback=delivery_report
-        )
+        try:
+            key = item.get("url", "")
+            producer.produce(
+                topic=topic,
+                key=key,
+                value=json.dumps(item).encode("utf-8"),
+                callback=delivery_report
+            )
+        except BufferError:
+            # queue đầy → phải poll để giải phóng
+            producer.poll(1)
+            producer.produce(
+                topic=topic,
+                key=key,
+                value=json.dumps(item).encode("utf-8"),
+                callback=delivery_report
+            )
 
         # poll theo từng batch để trigger callback
         if i % batch_poll == 0:
-            producer.poll(0)
+            producer.poll(0.5)
 
-    producer.flush()
-    logger.info(f"Sent {len(data)} messages to topic '{topic}'")    
+    producer.flush(5)
+    logger.info(f"[KAFKA] Sent {len(data)} messages -> {topic}")
 
 def delivery_report(err, msg):
     if err is not None:
-        logger.error(f"Failed to send message: {err} - {msg.key().decode()}")
+        logger.error(f"[KAFKA] Failed: {err}")
     else:
-        logger.info(f'Offset {msg.offset()} - {msg.key().decode()}')
+        logger.info(f"[KAFKA] Offset {msg.offset()}")
