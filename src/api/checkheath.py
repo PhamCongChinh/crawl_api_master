@@ -17,12 +17,12 @@ producer = Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 router = APIRouter(prefix="/api/v1/check", tags=["Check"])
 
 # Heartbeat
-@router.get("/heartbeat")
+@router.post("/heartbeat")
 async def check_heartbeat(data: dict):
     now = datetime.now(timezone.utc)
     bot = await BotHealth.find_one(BotHealth.bot_id == data["bot_name"])
     print(bot)
-    pass
+    return bot
 
 @router.get("/server")
 async def system_health():
