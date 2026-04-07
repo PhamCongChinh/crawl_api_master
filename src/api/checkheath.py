@@ -6,6 +6,7 @@ from src.core.logging import logger
 from confluent_kafka.admin import AdminClient
 from confluent_kafka import Producer
 from src.core.mongo import db
+import psutil
 
 KAFKA_BOOTSTRAP_SERVERS = f"{settings.KAFKA_BROKER_HOST}:{settings.KAFKA_BROKER_PORT}"
 # --- Kafka clients -------------------------------------------------
@@ -13,6 +14,40 @@ admin = AdminClient({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 producer = Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 
 router = APIRouter(prefix="/api/v1/check", tags=["Check"])
+
+@router.get("/server")
+async def system_health():
+    # %CPU
+    cpu_percent = psutil.cpu_percent(interval=1)
+    # RAM
+    memory = psutil.virtual_memory()
+    # Disk
+    disk = psutil.disk_usage('/')
+    
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+
+        "cpu": {
+            "percent": cpu_percent,
+            "cores": psutil.cpu_count()
+        },
+
+        "memory": {
+            "total": round(memory.total / (1024**3), 2),   # GB
+            "used": round(memory.used / (1024**3), 2),
+            "free": round(memory.available / (1024**3), 2),
+            "percent": memory.percent
+        },
+
+        "disk": {
+            "total": round(disk.total / (1024**3), 2),
+            "used": round(disk.used / (1024**3), 2),
+            "free": round(disk.free / (1024**3), 2),
+            "percent": disk.percent
+        }
+    }
+
 
 @router.get("/health")
 async def check_health():
