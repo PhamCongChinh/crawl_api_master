@@ -23,10 +23,10 @@ async def system_health():
     memory = psutil.virtual_memory()
     # Disk
     disk = psutil.disk_usage('/')
-    
+
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc),
 
         "cpu": {
             "percent": cpu_percent,
