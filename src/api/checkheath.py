@@ -26,7 +26,7 @@ async def check_heartbeat(data: dict):
     bot_type = data.get("bot_type")
     records = data.get("records", 0)
 
-    collection = db["tiktok_bot_configs"]
+    collection = db["bots_health"]
 
     if not bot_id:
         return {"error": "bot_id is required"}
@@ -37,6 +37,7 @@ async def check_heartbeat(data: dict):
         # insert mới
         doc = {
             "bot_id": bot_id,
+            "bot_name": bot_name,
             "bot_type": bot_type,
             "last_ping": now_unix,
             "last_data_time": now_unix if records > 0 else None,
@@ -64,9 +65,8 @@ async def check_heartbeat(data: dict):
 
 @router.get("/bot-health")
 async def check_bot_health():
-    collection = db["tiktok_bot_configs"]
+    collection = db["bots_health"]
     bots = await collection.find().to_list(length=200)
-    print(bots)
 
     result = []
 
@@ -75,10 +75,7 @@ async def check_bot_health():
         now_unix = int(time.time())
         last_ping = b.get("last_ping")
         last_data_time = b.get("last_data_time")
-        # fix timezone nếu thiếu
         
-        print(now_unix)
-         # check trạng thái
         if now_unix - last_ping > 90:
             status = "dead"
         # elif last_data_time and now - last_data_time > timedelta(minutes=5):
