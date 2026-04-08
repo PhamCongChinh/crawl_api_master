@@ -16,10 +16,12 @@ producer = Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 
 router = APIRouter(prefix="/api/v1/check", tags=["Check"])
 
+vn_tz = timezone(timedelta(hours=7))
+
 # Heartbeat
 @router.post("/heartbeat")
 async def check_heartbeat(data: dict):
-    now = datetime.now(timezone.utc)
+    now = datetime.now(vn_tz)
     bot_id = data.get("bot_id")
     bot_name = data.get("bot_name")
     bot_type = data.get("bot_type")
@@ -31,8 +33,6 @@ async def check_heartbeat(data: dict):
         return {"error": "bot_id is required"}
 
     bot = await collection.find_one({"bot_id": bot_id})
-
-    print(bot)
 
     if not bot:
         # insert mới
@@ -61,6 +61,33 @@ async def check_heartbeat(data: dict):
         )
 
     return {"status": "ok"}
+
+
+@router.get("/bot-health")
+async def check_bot_health():
+    collection = db["tiktok_bot_configs"]
+    bots = await collection.find_all().to_list()
+
+    result = []
+
+    for b in bots:
+        # check sống/chết
+        now = datetime.now(vn_tz)
+        if now - b.last_ping > timedelta(seconds=90):
+            status = "dead"
+        elif b.last_data_time and now - b.last_data_time > timedelta(minutes=5):
+            status = "warning"  # sống nhưng không crawl được data
+        else:
+            status = "alive"
+
+        result.append({
+            "bot_id": b.bot_id,
+            "bot_name": b.bot_name,
+            "bot_type": b.bot_type,
+            "status": status
+        })
+
+        return result
 
 @router.get("/server")
 async def system_health():
