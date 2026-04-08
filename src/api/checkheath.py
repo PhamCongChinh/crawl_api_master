@@ -8,6 +8,7 @@ from confluent_kafka.admin import AdminClient
 from confluent_kafka import Producer
 from src.core.mongo import db
 import psutil
+import time
 
 KAFKA_BOOTSTRAP_SERVERS = f"{settings.KAFKA_BROKER_HOST}:{settings.KAFKA_BROKER_PORT}"
 # --- Kafka clients -------------------------------------------------
@@ -16,12 +17,10 @@ producer = Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 
 router = APIRouter(prefix="/api/v1/check", tags=["Check"])
 
-vn_tz = timezone(timedelta(hours=7))
-
 # Heartbeat
 @router.post("/heartbeat")
 async def check_heartbeat(data: dict):
-    now = datetime.now(vn_tz)
+    now_unix = int(time.time())
     bot_id = data.get("bot_id")
     bot_name = data.get("bot_name")
     bot_type = data.get("bot_type")
@@ -39,8 +38,8 @@ async def check_heartbeat(data: dict):
         doc = {
             "bot_id": bot_id,
             "bot_type": bot_type,
-            "last_ping": now,
-            "last_data_time": now if records > 0 else None,
+            "last_ping": now_unix,
+            "last_data_time": now_unix if records > 0 else None,
             "status": "alive"
         }
         await collection.insert_one(doc)
@@ -48,12 +47,12 @@ async def check_heartbeat(data: dict):
     else:
         # update
         update_data = {
-            "last_ping": now,
+            "last_ping": now_unix,
             "status": "alive"
         }
 
         if records > 0:
-            update_data["last_data_time"] = now
+            update_data["last_data_time"] = now_unix
 
         await collection.update_one(
             {"bot_id": bot_id},
@@ -66,24 +65,31 @@ async def check_heartbeat(data: dict):
 @router.get("/bot-health")
 async def check_bot_health():
     collection = db["tiktok_bot_configs"]
-    bots = await collection.find_all().to_list()
+    bots = await collection.find().to_list(length=200)
+    print(bots)
 
     result = []
 
     for b in bots:
         # check sống/chết
-        now = datetime.now(vn_tz)
-        if now - b.last_ping > timedelta(seconds=90):
+        now_unix = int(time.time())
+        last_ping = b.get("last_ping")
+        last_data_time = b.get("last_data_time")
+        # fix timezone nếu thiếu
+        
+        print(now_unix)
+         # check trạng thái
+        if now_unix - last_ping > 90:
             status = "dead"
-        elif b.last_data_time and now - b.last_data_time > timedelta(minutes=5):
-            status = "warning"  # sống nhưng không crawl được data
+        # elif last_data_time and now - last_data_time > timedelta(minutes=5):
+        #     status = "warning"
         else:
             status = "alive"
 
         result.append({
-            "bot_id": b.bot_id,
-            "bot_name": b.bot_name,
-            "bot_type": b.bot_type,
+            "bot_id": b.get("bot_id"),
+            "bot_name": b.get("bot_name"),
+            "bot_type": b.get("bot_type"),
             "status": status
         })
 
