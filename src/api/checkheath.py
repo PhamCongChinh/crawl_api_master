@@ -20,9 +20,47 @@ router = APIRouter(prefix="/api/v1/check", tags=["Check"])
 @router.post("/heartbeat")
 async def check_heartbeat(data: dict):
     now = datetime.now(timezone.utc)
-    bot = await BotHealth.find_one(BotHealth.bot_id == data["bot_name"])
+    bot_id = data.get("bot_id")
+    bot_name = data.get("bot_name")
+    bot_type = data.get("bot_type")
+    records = data.get("records", 0)
+
+    collection = db["tiktok_bot_configs"]
+
+    if not bot_id:
+        return {"error": "bot_id is required"}
+
+    bot = await collection.find_one({"bot_id": bot_id})
+
     print(bot)
-    return bot
+
+    if not bot:
+        # insert mới
+        doc = {
+            "bot_id": bot_id,
+            "bot_type": bot_type,
+            "last_ping": now,
+            "last_data_time": now if records > 0 else None,
+            "status": "alive"
+        }
+        await collection.insert_one(doc)
+
+    else:
+        # update
+        update_data = {
+            "last_ping": now,
+            "status": "alive"
+        }
+
+        if records > 0:
+            update_data["last_data_time"] = now
+
+        await collection.update_one(
+            {"bot_id": bot_id},
+            {"$set": update_data}
+        )
+
+    return {"status": "ok"}
 
 @router.get("/server")
 async def system_health():
