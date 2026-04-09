@@ -2,33 +2,41 @@ import time
 
 from src.core.redis_client import redis_client
 
-def track_bot(data):
+async def track_bot(data):
     if isinstance(data, list):
         for item in data:
-            _track_single(item)
+            await _track_single(item)
     else:
-        _track_single(data)
+        await _track_single(data)
 
-def _track_single(data: dict):
-    platform = data.get("crawl_source_code")  # tt, yt, web
-    bot_id = data.get("crawl_bot")            # tiktok-1
+
+async def _track_single(data: dict):
+    platform = data.get("crawl_source_code")
+    bot_id = data.get("crawl_bot", "default")
+
+    if not platform:
+        return  # tránh rác key
 
     now = int(time.time())
 
+    pipe = redis_client.pipeline()
+
     # ===== PLATFORM =====
-    redis_client.set(f"bot:{platform}:last_seen", now, ex=300)
+    pipe.set(f"bot:{platform}:last_seen", now, ex=300)
 
-    redis_client.incr(f"bot:{platform}:count:1m")
-    redis_client.expire(f"bot:{platform}:count:1m", 60)
+    pipe.incr(f"bot:{platform}:count:1m")
+    pipe.expire(f"bot:{platform}:count:1m", 60)
 
-    redis_client.incr(f"bot:{platform}:count:5m")
-    redis_client.expire(f"bot:{platform}:count:5m", 300)
+    pipe.incr(f"bot:{platform}:count:5m")
+    pipe.expire(f"bot:{platform}:count:5m", 300)
 
     # ===== BOT =====
-    redis_client.set(f"bot:{platform}:{bot_id}:last_seen", now, ex=300)
+    pipe.set(f"bot:{platform}:{bot_id}:last_seen", now, ex=300)
 
-    redis_client.incr(f"bot:{platform}:{bot_id}:count:1m")
-    redis_client.expire(f"bot:{platform}:{bot_id}:count:1m", 60)
+    pipe.incr(f"bot:{platform}:{bot_id}:count:1m")
+    pipe.expire(f"bot:{platform}:{bot_id}:count:1m", 60)
 
-    redis_client.incr(f"bot:{platform}:{bot_id}:count:5m")
-    redis_client.expire(f"bot:{platform}:{bot_id}:count:5m", 300)
+    pipe.incr(f"bot:{platform}:{bot_id}:count:5m")
+    pipe.expire(f"bot:{platform}:{bot_id}:count:5m", 300)
+
+    await pipe.execute()
