@@ -23,8 +23,8 @@ async def root():
 async def check_redis():
     try:
         res = await ping_redis()
-        last_seen = redis_client.get(f"bot:tt:last_seen")
-        count_5m = int(redis_client.get(f"bot:tt:count:5m") or 0)
+        last_seen = await redis_client.get(f"bot:tt:last_seen")
+        count_5m = await (redis_client.get(f"bot:tt:count:5m") or 0)
         print(last_seen)
         print(count_5m)
         return {

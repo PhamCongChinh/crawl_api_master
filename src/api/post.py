@@ -46,8 +46,6 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
         topic = settings.KAFKA_TOPIC_UNCLASSIFIED
         data = request.get("data", []) # return list<dict>
 
-        await track_bot.track_bot(data)
-
         # cleaned_data = []
         # for item in data:
         #     if isinstance(item, dict):
@@ -57,6 +55,7 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
         # background_tasks.add_task(send_to_kafka, topic, cleaned_data)
 
         if len(data) > 0:
+            background_tasks.add_task(track_bot.track_bot, data)
             background_tasks.add_task(send_to_kafka, topic, data)
 
         return {"status": "OK", "detail": f"Sent to topic '{topic}'"}
