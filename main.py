@@ -3,6 +3,7 @@ import uvicorn
 from src.core.redis_client import ping_redis, redis_client
 from src.core.config import settings
 from src.api import router_post, router_checkhealth
+from src.utils.check_bot import check_bot, check_platform
 
 app = FastAPI()
 
@@ -35,3 +36,19 @@ async def check_redis():
             "status": "dead",
             "error": str(e)
         }
+    
+@app.get("/bot-health")
+def bot_health():
+    platforms = ["tt", "yt", "web"]
+    result = []
+
+    for p in platforms:
+        status = check_platform(p)
+
+        result.append({
+            "platform": p,
+            "status": status,
+            "records_time": int(redis_client.get(f"bot:{p}:count:time") or 0)
+        })
+
+    return result
