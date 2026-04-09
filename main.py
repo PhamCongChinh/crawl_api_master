@@ -25,10 +25,10 @@ async def check_redis():
         res = await ping_redis()
         last_seen = await redis_client.get(f"bot:tt:last_seen")
         count_5m = await (redis_client.get(f"bot:tt:count:5m") or 0)
-        print(last_seen)
-        print(count_5m)
         return {
-            "status": "healthy" if res else "unhealthy"
+            "status": "healthy" if res else "unhealthy",
+            "tiktok_last_seen": last_seen,
+            "tiktok_count": count_5m
         }
     except Exception as e:
         return {

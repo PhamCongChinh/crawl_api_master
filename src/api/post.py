@@ -51,7 +51,6 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
         #     if isinstance(item, dict):
         #         item.pop("server", None)  # xóa nếu có
         #         cleaned_data.append(item)
-
         # background_tasks.add_task(send_to_kafka, topic, cleaned_data)
 
         if len(data) > 0:
