@@ -47,14 +47,14 @@ async def bot_health():
     async def get_platform_data(p):
         last_seen, count = await asyncio.gather(
             redis_client.get(f"bot:{p}:last_seen"),
-            redis_client.get(f"bot:{p}:count:5m")
+            redis_client.get(f"bot:{p}:count:time")
         )
 
         if not last_seen:
             status = "die"
         else:
             delay = int(time.time()) - int(last_seen)
-            status = "delay" if delay > 300 else "ok"
+            status = "delay" if delay > 7200 else "ok"
 
         return {
             "platform": p,

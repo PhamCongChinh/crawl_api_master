@@ -25,13 +25,13 @@ async def _track_single(data: dict):
     pipe.set(f"bot:{platform}:last_seen", now, ex=300)
 
     pipe.incr(f"bot:{platform}:count:time")
-    pipe.expire(f"bot:{platform}:count:time", 60, nx=True)
+    pipe.expire(f"bot:{platform}:count:time", 7200, nx=True)
 
 
     # ===== BOT =====
     pipe.set(f"bot:{platform}:{bot_id}:last_seen", now, ex=300)
 
     pipe.incr(f"bot:{platform}:{bot_id}:count:time")
-    pipe.expire(f"bot:{platform}:{bot_id}:count:time", 60, nx=True)
+    pipe.expire(f"bot:{platform}:{bot_id}:count:time", 7200, nx=True)
 
     await pipe.execute()

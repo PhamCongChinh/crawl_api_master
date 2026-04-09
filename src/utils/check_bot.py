@@ -11,7 +11,7 @@ async def check_platform(platform):
     if not last_seen:
         return "dead"
 
-    if now - int(last_seen) > 120:
+    if now - int(last_seen) > 7200:
         return "dead"
 
     if count_time == 0:
@@ -29,7 +29,7 @@ async def check_bot(platform, bot_id):
     if not last_seen:
         return "dead"
 
-    if now - int(last_seen) > 120:
+    if now - int(last_seen) > 7200:
         return "dead"
 
     if count_time == 0:
