@@ -39,7 +39,7 @@ async def check_redis():
     
 @app.get("/bot-health")
 def bot_health():
-    platforms = ["tt", "yt", "web"]
+    platforms = ["tt", "yt", "web", "fb"]
     result = []
 
     for p in platforms:
@@ -48,7 +48,7 @@ def bot_health():
         result.append({
             "platform": p,
             "status": status,
-            "records_time": int(redis_client.get(f"bot:{p}:count:time") or 0)
+            "records": int(redis_client.get(f"bot:{p}:count:time") or 0)
         })
 
     return result
