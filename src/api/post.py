@@ -46,7 +46,7 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
         topic = settings.KAFKA_TOPIC_UNCLASSIFIED
         data = request.get("data", []) # return list<dict>
 
-        track_bot(data)
+        track_bot.track_bot(data)
 
         # cleaned_data = []
         # for item in data:
