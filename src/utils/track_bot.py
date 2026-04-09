@@ -2,7 +2,14 @@ import time
 
 from src.core.redis_client import redis_client
 
-def track_bot(data: dict):
+def track_bot(data):
+    if isinstance(data, list):
+        for item in data:
+            _track_single(item)
+    else:
+        _track_single(data)
+
+def _track_single(data: dict):
     platform = data.get("crawl_source_code")  # tt, yt, web
     bot_id = data.get("crawl_bot")            # tiktok-1
 
