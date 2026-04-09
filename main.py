@@ -1,3 +1,6 @@
+import asyncio
+import time
+
 from fastapi import FastAPI
 import uvicorn
 from src.core.redis_client import ping_redis, redis_client
@@ -25,11 +28,11 @@ async def check_redis():
     try:
         res = await ping_redis()
         last_seen = await redis_client.get(f"bot:tt:last_seen")
-        count_5m = await (redis_client.get(f"bot:tt:count:5m") or 0)
+        count_time = await (redis_client.get(f"bot:tt:count:time") or 0)
         return {
             "status": "healthy" if res else "unhealthy",
             "tiktok_last_seen": last_seen,
-            "tiktok_count": count_5m
+            "tiktok_count": count_time
         }
     except Exception as e:
         return {
@@ -40,18 +43,27 @@ async def check_redis():
 @app.get("/bot-health")
 async def bot_health():
     platforms = ["tt", "yt", "web", "fb"]
-    result = []
-    
 
+    async def get_platform_data(p):
+        last_seen, count = await asyncio.gather(
+            redis_client.get(f"bot:{p}:last_seen"),
+            redis_client.get(f"bot:{p}:count:5m")
+        )
 
-    for p in platforms:
-        status = check_platform(p)
-        count = await redis_client.get(f"bot:{p}:count:time")
+        if not last_seen:
+            status = "die"
+        else:
+            delay = int(time.time()) - int(last_seen)
+            status = "delay" if delay > 300 else "ok"
 
-        result.append({
+        return {
             "platform": p,
             "status": status,
             "records": int(count or 0)
-        })
+        }
+
+    result = await asyncio.gather(
+        *[get_platform_data(p) for p in platforms]
+    )
 
     return result
