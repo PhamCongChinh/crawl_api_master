@@ -41,8 +41,8 @@ async def check_redis():
 async def bot_health():
     platforms = ["tt", "yt", "web", "fb"]
     result = []
-    rc = await redis_client.get(f"bot:{p}:count:time") or 0
-    records = int(rc)
+    count = await redis_client.get(f"bot:{p}:count:time")
+
 
     for p in platforms:
         status = check_platform(p)
@@ -50,7 +50,7 @@ async def bot_health():
         result.append({
             "platform": p,
             "status": status,
-            "records": records
+            "records": int(count or 0)
         })
 
     return result
