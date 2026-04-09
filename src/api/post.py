@@ -3,6 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException
 from src.core.config import settings
 from src.core.logging import logger
 from src.kafka.service import send_to_kafka
+from src.utils import track_bot
 
 router = APIRouter(prefix="/api/v1/posts", tags=["Post"])
 
@@ -44,6 +45,8 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
 
         topic = settings.KAFKA_TOPIC_UNCLASSIFIED
         data = request.get("data", []) # return list<dict>
+
+        track_bot(data)
 
         # cleaned_data = []
         # for item in data:
