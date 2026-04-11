@@ -46,7 +46,9 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
 
         try:
             producer.produce(topic=topic, key=hash_key, value=value, callback=delivery_report)
-            logger.info(f"[KAFKA] Queued: {key_raw}")
+            platform = item.get("crawl_source_code", "?")
+            bot = item.get("crawl_bot", "?")
+            logger.info(f"[KAFKA] Queued | platform={platform} bot={bot} url={key_raw}")
         except BufferError:
             producer.poll(1)
             producer.produce(topic=topic, key=hash_key, value=value, callback=delivery_report)
