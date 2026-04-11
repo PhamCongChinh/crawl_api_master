@@ -52,6 +52,7 @@ def send_to_kafka(topic: str, data: list, batch_poll: int = 1000):
         except BufferError:
             producer.poll(1)
             producer.produce(topic=topic, key=hash_key, value=value, callback=delivery_report)
+            logger.warning(f"[KAFKA] BufferError retry | url={key_raw}")
 
         if i % batch_poll == 0:
             producer.poll(0.5)

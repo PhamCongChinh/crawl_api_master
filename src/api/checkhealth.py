@@ -1,11 +1,9 @@
 import time
+import asyncio
 import psutil
 from datetime import datetime, timedelta, timezone
 
-import asyncio
 from fastapi import APIRouter
-from src.core.config import settings
-from src.core.logging import logger
 from src.core.mongo import db
 from src.kafka.service import admin
 
