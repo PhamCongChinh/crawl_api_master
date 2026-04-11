@@ -32,7 +32,7 @@ async def insert_posts_unclassified(request: dict, background_tasks: BackgroundT
         data = request.get("data", [])
 
         if data:
-            background_tasks.add_task(track_bot, data)
+            # background_tasks.add_task(track_bot, data)
             background_tasks.add_task(send_to_kafka, topic, data)
 
         return {"status": "OK", "detail": f"Sent to topic '{topic}'"}
